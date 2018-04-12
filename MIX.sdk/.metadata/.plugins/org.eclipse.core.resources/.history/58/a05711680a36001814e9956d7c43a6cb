@@ -1,0 +1,138 @@
+/*
+ * video_system.c
+ *
+ *  Created on: 2018骞�3鏈�15鏃�
+ *      Author: Beats
+ */
+#include "video_system.h"
+#include "xil_io.h"
+#include "xparameters.h"
+#include "sleep.h"
+#define IN0ADDR0 0x10500000
+#define IN0ADDR1 0x11000000
+#define IN0ADDR2 0x11500000
+
+#define IN1ADDR0 0x12000000
+#define IN1ADDR1 0x12500000
+#define IN1ADDR2 0x13000000
+
+#define OUTADDR0 0x08500000
+#define OUTADDR1 0x09000000
+#define OUTADDR2 0x09500000
+
+#define HSizei 640
+#define VSizei 480
+#define HSizeo 1280
+#define VSizeo 720
+#define EN_ADDR 0x41200000
+
+#define VDMA_WR_ADDR0 0x43000000
+#define VDMA_WR_ADDR1 0x43010000
+#define VDMA_RD_ADDR  0x43020000
+#define MIX_CTRL 0x43c00000
+
+
+void Init_Video_System()
+{
+	Xil_Out8(EN_ADDR,0x00);
+	Xil_Out32(MIX_CTRL,0);
+	usleep(100000);
+
+	Xil_Out32(MIX_CTRL+20,0);
+
+	Xil_Out32(MIX_CTRL,620);
+	Xil_Out32(MIX_CTRL+4,100);
+	Xil_Out32(MIX_CTRL+8,000);
+	Xil_Out32(MIX_CTRL+12,100);
+	//Init VDMA wr1
+			Xil_Out32((VDMA_RD_ADDR + 0x030), 0x00000003);// enable circular mode
+			Xil_Out32((VDMA_RD_ADDR + 0x030), 0x0000008b);// enable circular mode
+			Xil_Out32((VDMA_RD_ADDR + 0x0AC), OUTADDR0);	// start address
+			Xil_Out32((VDMA_RD_ADDR + 0x0B0), OUTADDR1);	// start address
+			Xil_Out32((VDMA_RD_ADDR + 0x0B4), OUTADDR2);	// start address
+			Xil_Out32((VDMA_RD_ADDR + 0x0A8), (HSizeo*4));		// h offset (640 * 4) bytes
+			Xil_Out32((VDMA_RD_ADDR + 0x0A4), (HSizeo*4));		// h size (640 * 4) bytes
+			Xil_Out32((VDMA_RD_ADDR + 0x0A0), (720));		// v size (480)
+
+			/*****************麓脫DDR露脕脢媒戮脻脡猫脰脙**********************/
+			Xil_Out32((VDMA_RD_ADDR + 0x000), 0x0000003); 		// enable circular mode
+			Xil_Out32((VDMA_RD_ADDR + 0x000), 0x000008b); 		// enable circular mode
+			Xil_Out32((VDMA_RD_ADDR + 0x05c), OUTADDR0); 	// start address
+			Xil_Out32((VDMA_RD_ADDR + 0x060), OUTADDR1); 	// start address
+			Xil_Out32((VDMA_RD_ADDR + 0x064), OUTADDR2); 	// start address
+			Xil_Out32((VDMA_RD_ADDR + 0x058), (HSizeo*4)); 		// h offset (640 * 4) bytes
+			Xil_Out32((VDMA_RD_ADDR + 0x054), (HSizeo*4)); 		// h size (640 * 4) bytes
+			Xil_Out32((VDMA_RD_ADDR + 0x050), VSizeo); 			// v size (480)
+	//Init VDMA wr1
+	Xil_Out32((VDMA_WR_ADDR0 + 0x030), 0x00000003);// enable circular mode
+	Xil_Out32((VDMA_WR_ADDR0 + 0x030), 0x0000008b);// enable circular mode
+	Xil_Out32((VDMA_WR_ADDR0 + 0x0AC), IN0ADDR0);	// start address
+	Xil_Out32((VDMA_WR_ADDR0 + 0x0B0), IN0ADDR1);	// start address
+	Xil_Out32((VDMA_WR_ADDR0 + 0x0B4), IN0ADDR2);	// start address
+	Xil_Out32((VDMA_WR_ADDR0 + 0x0A8), (640*4));		// h offset (640 * 4) bytes
+	Xil_Out32((VDMA_WR_ADDR0 + 0x0A4), (640*4));		// h size (640 * 4) bytes
+	Xil_Out32((VDMA_WR_ADDR0 + 0x0A0), (360));		// v size (480)
+
+	/*****************麓脫DDR露脕脢媒戮脻脡猫脰脙**********************/
+	Xil_Out32((VDMA_WR_ADDR0 + 0x000), 0x0000003); 		// enable circular mode
+	Xil_Out32((VDMA_WR_ADDR0 + 0x000), 0x000008b); 		// enable circular mode
+	Xil_Out32((VDMA_WR_ADDR0 + 0x05c), IN0ADDR0); 	// start address
+	Xil_Out32((VDMA_WR_ADDR0 + 0x060), IN0ADDR1); 	// start address
+	Xil_Out32((VDMA_WR_ADDR0 + 0x064), IN0ADDR2); 	// start address
+	Xil_Out32((VDMA_WR_ADDR0 + 0x058), (640*4)); 		// h offset (640 * 4) bytes
+	Xil_Out32((VDMA_WR_ADDR0 + 0x054), (640*4)); 		// h size (640 * 4) bytes
+	Xil_Out32((VDMA_WR_ADDR0 + 0x050), 360); 			// v size (480)
+	//Init VDMA wr1
+	Xil_Out32((VDMA_WR_ADDR1 + 0x030), 0x00000003);// enable circular mode
+	Xil_Out32((VDMA_WR_ADDR1 + 0x030), 0x0000008b);// enable circular mode
+	Xil_Out32((VDMA_WR_ADDR1 + 0x0AC), IN1ADDR0);	// start address
+	Xil_Out32((VDMA_WR_ADDR1 + 0x0B0), IN1ADDR1);	// start address
+	Xil_Out32((VDMA_WR_ADDR1 + 0x0B4), IN1ADDR2);	// start address
+	Xil_Out32((VDMA_WR_ADDR1 + 0x0A8), (640*4));		// h offset (640 * 4) bytes
+	Xil_Out32((VDMA_WR_ADDR1 + 0x0A4), (640*4));		// h size (640 * 4) bytes
+	Xil_Out32((VDMA_WR_ADDR1 + 0x0A0), (360));		// v size (480)
+
+	/*****************麓脫DDR露脕脢媒戮脻脡猫脰脙**********************/
+	Xil_Out32((VDMA_WR_ADDR1 + 0x000), 0x0000003); 		// enable circular mode
+	Xil_Out32((VDMA_WR_ADDR1 + 0x000), 0x000008b); 		// enable circular mode
+	Xil_Out32((VDMA_WR_ADDR1 + 0x05c), IN1ADDR0); 	// start address
+	Xil_Out32((VDMA_WR_ADDR1 + 0x060), IN1ADDR1); 	// start address
+	Xil_Out32((VDMA_WR_ADDR1 + 0x064), IN1ADDR2); 	// start address
+	Xil_Out32((VDMA_WR_ADDR1 + 0x058), (640*4)); 		// h offset (640 * 4) bytes
+	Xil_Out32((VDMA_WR_ADDR1 + 0x054), (640*4)); 		// h size (640 * 4) bytes
+	Xil_Out32((VDMA_WR_ADDR1 + 0x050), 360); 			// v size (480)
+
+
+
+	usleep(100000);
+	Xil_Out8(EN_ADDR,0xff);
+	Xil_Out32(MIX_CTRL+16,0x0);
+	Xil_Out32(MIX_CTRL+20,0xffffffff);
+
+}
+void Video_Test()
+{
+//	static u8 r,g,b;
+//	r+=20;
+//	g+=50;
+//	b+=20;
+//
+//	u8 *p = Fram1Addr;
+//	int i,j,k;
+//	k = 1280*720*4;
+//	for(i = 0;i <720;i++)
+//	{
+//		for(j = 0; j <1280;j++)
+//		{
+//			p[i*1280*4+j*4+0] = 0x0;
+//			p[i*1280*4+j*4+1] = 0xff;
+//			p[i*1280*4+j*4+2] = 0x0;
+//		}
+//	}
+}
+void GetVal(u32 ADDR)
+{
+	u32 temp;
+	temp = Xil_In32(ADDR);
+	printf("%p:%p\n\r",ADDR,temp);
+}
